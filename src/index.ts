@@ -29,8 +29,12 @@ server.listen(8080, () => {
 const MONGO_URL =
   "mongodb+srv://hnlong:long44227029@cluster0.ltragyj.mongodb.net/"; // DB URI
 
+mongoose.set("strictQuery", false);
+mongoose.connect(MONGO_URL, () => {
+  console.log("Connected to MongoDB");
+});
+
 mongoose.Promise = Promise;
-mongoose.connect(MONGO_URL);
 mongoose.connection.on("error", (error: Error) => console.log(error));
 
 app.use("/", router());
