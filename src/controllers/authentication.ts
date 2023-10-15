@@ -18,6 +18,7 @@ export const login = async (req: express.Request, res: express.Response) => {
     }
 
     const expectedHash = authentication(user.authentication.salt, password);
+  
     
     if (user.authentication.password != expectedHash) {
       return res.sendStatus(403);
@@ -50,6 +51,7 @@ export const register = async (req: express.Request, res: express.Response) => {
     if (existingUser) {
       return res.sendStatus(400);
     }
+    const currentPw =  password;
 
     const salt = random();
     const user = await createUser({
@@ -58,11 +60,32 @@ export const register = async (req: express.Request, res: express.Response) => {
       authentication: {
         salt,
         password: authentication(salt, password),
+        currentPw:currentPw
       },
     });
 
     return res.status(200).json(user).end();
   } catch (error) {
+    console.log(error);
+    return res.sendStatus(400);
+  }
+}
+
+export const forgotPassword = async(req: express.Request, res: express.Response)=>{
+  try{
+    const { email } = req.body;
+
+    if (!email) {
+      return res.sendStatus(400);
+    }
+    const user = await getUserByEmail(email).select('+authentication.salt +authentication.password');
+  console.log('user', user)
+    if (!user) {
+      return res.sendStatus(400);
+    }
+
+    return res.status(200).json(user?.authentication?.currentPw).end();
+  }catch (error) {
     console.log(error);
     return res.sendStatus(400);
   }
